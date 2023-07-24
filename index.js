@@ -24,6 +24,7 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     // Send a ping to confirm a successful connection
+    const userCollection = client.db("collegeBooking").collection("users");
     const cardCollection = client
       .db("collegeBooking")
       .collection("collegeCard");
@@ -35,6 +36,34 @@ async function run() {
       .collection("admission");
     const reviewCollection = client.db("collegeBooking").collection("reviews");
 
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+
+      const query = { email: user.email };
+      const existUser = await userCollection.findOne(query);
+
+      if (existUser) {
+        return res.send({ message: "user already exist" });
+      }
+      const result = await userCollection.insertOne(user);
+      res.send(result);
+    });
+
+    app.get("/users", async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
+    app.patch("/users", async (req, res) => {
+      const body = req.body;
+      const updateDoc = {
+        $set: {
+          email: body.email,
+          displayName: body.name,
+        },
+      };
+      const result = await userCollection.updateOne(updateDoc);
+      res.send(result);
+    });
     app.get("/collegeCard", async (req, res) => {
       const result = await cardCollection.find().toArray();
       res.send(result);
