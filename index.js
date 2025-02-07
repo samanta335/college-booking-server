@@ -6,6 +6,8 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
 
 app.use(cors());
+app.use(express.json({ limit: "50mb" }));  // Increase JSON payload size limit
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.wvw2zcx.mongodb.net/?retryWrites=true&w=majority`;
@@ -35,7 +37,29 @@ async function run() {
       .db("collegeBooking")
       .collection("admission");
     const reviewCollection = client.db("collegeBooking").collection("reviews");
+    const imageCollection = client.db("collegeBooking").collection("images")
+ //
+ app.post("/upload", async (req, res) => {
+  try {
+    const { image } = req.body;
+    if (!image) {
+      return res.status(400).json({ error: "No image provided" });
+    }
 
+    const result = await imageCollection.insertOne({ image });
+    res.json({ message: "Image uploaded successfully", id: result.insertedId });
+  } catch (error) {
+    console.error("Upload Error:", error);
+    res.status(500).json({ error: "Failed to upload image" });
+  }
+});
+
+// Fetch Images from MongoDB
+app.get("/images", async (req, res) => {
+  const images = await imageCollection.find().toArray();
+  res.json(images);
+});
+//
     app.post("/users", async (req, res) => {
       const user = req.body;
 
@@ -53,17 +77,7 @@ async function run() {
       const result = await userCollection.find().toArray();
       res.send(result);
     });
-    app.patch("/users", async (req, res) => {
-      const body = req.body;
-      const updateDoc = {
-        $set: {
-          email: body.email,
-          displayName: body.name,
-        },
-      };
-      const result = await userCollection.updateOne(updateDoc);
-      res.send(result);
-    });
+    
     app.get("/collegeCard", async (req, res) => {
       const result = await cardCollection.find().toArray();
       res.send(result);
@@ -97,6 +111,10 @@ async function run() {
         .toArray();
       res.send(result);
     });
+
+   
+    
+// 
     app.post("/review", async (req, res) => {
       const body = req.body;
       const result = await reviewCollection.insertOne(body);
