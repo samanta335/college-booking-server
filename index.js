@@ -6,7 +6,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const compression = require("compression");
 const port = process.env.PORT || 5000;
 
-app.use(cors({ origin: "https://college-booking-server-delta.vercel.app", credentials: true }));
+app.use(cors());
 app.use(compression());
 app.use(express.json({ limit: "50mb" }));  // Increase JSON payload size limit
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
