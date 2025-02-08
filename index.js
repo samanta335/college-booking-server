@@ -3,14 +3,12 @@ const app = express();
 const cors = require("cors");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
-const compression = require("compression");
 const port = process.env.PORT || 5000;
 
 app.use(cors());
-app.use(compression());
+app.use(express.json());
 app.use(express.json({ limit: "50mb" }));  // Increase JSON payload size limit
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
-app.use(express.json());
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.wvw2zcx.mongodb.net/?retryWrites=true&w=majority`;
 
